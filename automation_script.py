@@ -8,8 +8,8 @@ TENANT_ID = os.getenv('TENANT_ID')
 
 # Power BI settings
 WORKSPACE_ID = os.getenv('WORKSPACE_ID')
-PBIX_FILE_PATH = 'uploaded_files/model.pbix'  # Update with the actual path
-DATASET_NAME = 'Your Dataset Name'
+PBIX_FILE_PATH = 'uploaded_files/report11.pbix'  # Update with the actual path
+DATASET_NAME = 'report11'
 
 # Authenticate and get an access token
 def get_access_token():
