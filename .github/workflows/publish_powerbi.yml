@@ -26,4 +26,4 @@ jobs:
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           TENANT_ID: ${{ secrets.TENANT_ID }}
           WORKSPACE_ID: ${{ secrets.WORKSPACE_ID }}
-        run: python your_script.py  # Replace with your script's filename
+        run: python automation_script.py  # Replace with your script's filename
