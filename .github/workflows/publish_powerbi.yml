@@ -1,0 +1,29 @@
+name: Publish Power BI Model
+
+on:
+  push:
+    branches: [main]  # Adjust according to your branch
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: pip install requests
+
+      - name: Run Publish Script
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          TENANT_ID: ${{ secrets.TENANT_ID }}
+          WORKSPACE_ID: ${{ secrets.WORKSPACE_ID }}
+        run: python your_script.py  # Replace with your script's filename
