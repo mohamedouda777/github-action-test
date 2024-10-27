@@ -39,19 +39,18 @@ def get_access_token():
 def publish_pbix(access_token):
     url = f'https://api.powerbi.com/v1.0/myorg/groups/{WORKSPACE_ID}/imports?datasetDisplayName={DATASET_NAME}&nameConflict=Overwrite'
     headers = {
-        'Authorization': f'Bearer {access_token}'
+        'Authorization': f'Bearer {access_token}',
+        'Content-Type': 'multipart/form-data'  # Add this header
     }
-    print("Publishing with headers:", headers)  # Debugging line to check headers
     try:
         with open(PBIX_FILE_PATH, 'rb') as pbix_file:
             files = {
                 'file': pbix_file
             }
             response = requests.post(url, headers=headers, files=files)
-            if response.status_code != 200:
-                print("Error occurred during publishing:")
-                print("Status Code:", response.status_code)
-                print("Response Text:", response.text)
+            print("Publish request status code:", response.status_code)
+            print("Response headers:", response.headers)
+            print("Response text:", response.text)
             response.raise_for_status()
             print('Published the Power BI model successfully.')
     except requests.exceptions.HTTPError as e:
