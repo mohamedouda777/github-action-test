@@ -8,7 +8,7 @@ TENANT_ID = os.getenv('TENANT_ID')
 
 # Power BI settings
 WORKSPACE_ID = os.getenv('WORKSPACE_ID')
-PBIX_FILE_PATH = 'uploaded_files/report11.pbix'  # Update with the actual path
+PBIX_FILE_PATH = 'path/to/your/model.pbix'  # Update with the actual path
 DATASET_NAME = 'Your Dataset Name'  # Replace with your dataset name
 
 # Authenticate and get an access token
@@ -27,7 +27,7 @@ def get_access_token():
         response = requests.post(url, headers=headers, data=data)
         response.raise_for_status()
         access_token = response.json().get('access_token')
-        print("Access token retrieved successfully.")
+        print("Access token retrieved successfully:", access_token)
         return access_token
     except requests.exceptions.HTTPError as e:
         print("Failed to retrieve access token:")
@@ -41,6 +41,7 @@ def publish_pbix(access_token):
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
+    print("Publishing with headers:", headers)  # Debugging line to check headers
     try:
         with open(PBIX_FILE_PATH, 'rb') as pbix_file:
             files = {
