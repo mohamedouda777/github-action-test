@@ -3,6 +3,7 @@ name: Publish Power BI Model
 on:
   push:
     branches: [main]  # Adjust according to your branch
+  workflow_dispatch:   # This enables manual triggering
 
 jobs:
   publish:
