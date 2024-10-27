@@ -2,12 +2,12 @@ import requests
 import os
 
 # Azure AD app credentials (replace with environment variables or secure storage)
-CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')
-TENANT_ID = os.getenv('TENANT_ID')
+CLIENT_ID = '9e21238a-6014-40ea-8d72-591ee6d0f198'
+CLIENT_SECRET = 'IQH8Q~OSEG2s6bfghvEecNWMHSAgqWU~VGm12aa6'
+TENANT_ID = '58191332-4582-42f1-a685-f77f77def707'
 
 # Power BI settings
-WORKSPACE_ID = os.getenv('WORKSPACE_ID')
+WORKSPACE_ID = '009192AC-AF25-469E-B975-38B03BF5C118'
 PBIX_FILE_PATH = 'uploaded_files/report11.pbix'  # Update with the actual path
 DATASET_NAME = 'report11'
 
