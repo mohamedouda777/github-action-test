@@ -1,6 +1,7 @@
 name: Publish Power BI Report
 
 on:
+  workflow_dispatch:  # Allows the workflow to be triggered manually
   push:
     branches:
       - main
