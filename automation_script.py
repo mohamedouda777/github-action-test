@@ -11,7 +11,7 @@ PASSWORD = os.getenv('PASSWORD')
 
 # Power BI settings
 WORKSPACE_ID = os.getenv('WORKSPACE_ID')
-PBIX_FILE_PATH = 'path/to/your/model.pbix'  # Update with the actual path
+PBIX_FILE_PATH = 'uploaded_files/report11.pbix'  # Update with the actual path
 DATASET_NAME = 'Your Dataset Name'  # Replace with your dataset name
 
 # Authenticate and get an access token using ROPC flow
@@ -24,8 +24,8 @@ def get_access_token():
         'client_id': CLIENT_ID,
         'scope': 'https://analysis.windows.net/powerbi/api/.default',
         'grant_type': 'password',
-        'username': mohamed.ouda@btech.com,
-        'password': Wikidata33@
+         'username': USERNAME,
+        'password': PASSWORD
     }
     try:
         response = requests.post(url, headers=headers, data=data)
