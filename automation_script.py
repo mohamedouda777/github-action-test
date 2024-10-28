@@ -12,7 +12,7 @@ PASSWORD = os.getenv('PASSWORD')
 # Power BI settings
 WORKSPACE_ID = os.getenv('WORKSPACE_ID')
 PBIX_FILE_PATH = 'uploaded_files/report11.pbix'  # Update with the actual path
-DATASET_NAME = 'Your Dataset Name'  # Replace with your dataset name
+DATASET_NAME = 'mmmm'  # Replace with your dataset name
 
 # Authenticate and get an access token using ROPC flow
 def get_access_token():
