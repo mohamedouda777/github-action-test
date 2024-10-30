@@ -1,18 +1,19 @@
 import requests
 import os
 
-# Azure AD app credentials (ensure CLIENT_ID and TENANT_ID are set as environment variables)
+# Azure AD app credentials
 CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')  # New line to get client_secret
 TENANT_ID = os.getenv('TENANT_ID')
 
-# Service account credentials (set as environment variables for security)
-USERNAME = os.getenv('USERNAME')  # Service account's email
-PASSWORD = os.getenv('PASSWORD')  # Service account's password
+# Service account credentials
+USERNAME = os.getenv('USERNAME')
+PASSWORD = os.getenv('PASSWORD')
 
 # Power BI settings
 WORKSPACE_ID = os.getenv('WORKSPACE_ID')
-PBIX_FILE_PATH = os.getenv('PBIX_FILE_PATH')  # Update with the actual path to your .pbix file
-DATASET_NAME = os.getenv('DATASET_NAME')  # Name you want to give to the dataset in Power BI
+PBIX_FILE_PATH = os.getenv('PBIX_FILE_PATH')  # Update as needed
+DATASET_NAME = os.getenv('DATASET_NAME')  # Update as needed
 
 # Authenticate and get an access token using ROPC flow
 def get_access_token():
@@ -22,6 +23,7 @@ def get_access_token():
     }
     data = {
         'client_id': CLIENT_ID,
+        'client_secret': CLIENT_SECRET,  # Include the client_secret
         'scope': 'https://analysis.windows.net/powerbi/api/.default',
         'grant_type': 'password',
         'username': USERNAME,
@@ -69,7 +71,7 @@ def publish_pbix(access_token):
 def main():
     print("Starting Power BI publish process...")
     # Ensure all required environment variables are set
-    required_vars = [CLIENT_ID, TENANT_ID, USERNAME, PASSWORD, WORKSPACE_ID, PBIX_FILE_PATH, DATASET_NAME]
+    required_vars = [CLIENT_ID, CLIENT_SECRET, TENANT_ID, USERNAME, PASSWORD, WORKSPACE_ID, PBIX_FILE_PATH, DATASET_NAME]
     if not all(required_vars):
         print("One or more environment variables are missing. Please ensure all required variables are set.")
         return
