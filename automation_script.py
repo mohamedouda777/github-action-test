@@ -1,18 +1,18 @@
 import requests
 import os
 
-# Azure AD app credentials (replace with environment variables or secure storage)
+# Azure AD app credentials (ensure CLIENT_ID and TENANT_ID are set as environment variables)
 CLIENT_ID = os.getenv('CLIENT_ID')
 TENANT_ID = os.getenv('TENANT_ID')
 
-# User credentials
-USERNAME = os.getenv('USERNAME')
-PASSWORD = os.getenv('PASSWORD')
+# Service account credentials (set as environment variables for security)
+USERNAME = os.getenv('USERNAME')  # Service account's email
+PASSWORD = os.getenv('PASSWORD')  # Service account's password
 
 # Power BI settings
 WORKSPACE_ID = os.getenv('WORKSPACE_ID')
-PBIX_FILE_PATH = 'uploaded_files/report11.pbix'  # Update with the actual path
-DATASET_NAME = 'mmmm'  # Replace with your dataset name
+PBIX_FILE_PATH = os.getenv('PBIX_FILE_PATH')  # Update with the actual path to your .pbix file
+DATASET_NAME = os.getenv('DATASET_NAME')  # Name you want to give to the dataset in Power BI
 
 # Authenticate and get an access token using ROPC flow
 def get_access_token():
@@ -24,7 +24,7 @@ def get_access_token():
         'client_id': CLIENT_ID,
         'scope': 'https://analysis.windows.net/powerbi/api/.default',
         'grant_type': 'password',
-         'username': USERNAME,
+        'username': USERNAME,
         'password': PASSWORD
     }
     try:
@@ -55,7 +55,7 @@ def publish_pbix(access_token):
             print("Response headers:", response.headers)
             print("Response text:", response.text)
             response.raise_for_status()
-            print('Published the Power BI model successfully.')
+            print('Published the Power BI report successfully.')
     except requests.exceptions.HTTPError as e:
         print("Failed to publish the .pbix file:")
         print("Status Code:", e.response.status_code)
@@ -68,13 +68,17 @@ def publish_pbix(access_token):
 
 def main():
     print("Starting Power BI publish process...")
-    # Check if environment variables are loaded correctly
-    if not all([CLIENT_ID, TENANT_ID, USERNAME, PASSWORD, WORKSPACE_ID, PBIX_FILE_PATH]):
+    # Ensure all required environment variables are set
+    required_vars = [CLIENT_ID, TENANT_ID, USERNAME, PASSWORD, WORKSPACE_ID, PBIX_FILE_PATH, DATASET_NAME]
+    if not all(required_vars):
         print("One or more environment variables are missing. Please ensure all required variables are set.")
         return
 
     access_token = get_access_token()
-    publish_pbix(access_token)
+    if access_token:
+        publish_pbix(access_token)
+    else:
+        print("Failed to obtain access token.")
 
 if __name__ == '__main__':
     main()
