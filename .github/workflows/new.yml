@@ -52,4 +52,4 @@ jobs:
           PBIX_FILE_PATH: ${{ env.PBIX_FILE_PATH }}
           DATASET_NAME: ${{ env.DATASET_NAME }}
         run: |
-          python your_script_name.py  # Replace with the actual name of your script
+          python automation_script.py  # Replace with the actual name of your script
