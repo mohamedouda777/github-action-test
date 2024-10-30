@@ -1,0 +1,34 @@
+name: Publish Power BI Report
+
+on:
+  workflow_dispatch:  # Allows the workflow to be triggered manually
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Dependencies
+        run: pip install requests python-dotenv
+
+      - name: Run Publish Script
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          TENANT_ID: ${{ secrets.TENANT_ID }}
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          WORKSPACE_ID: ${{ secrets.WORKSPACE_ID }}
+          PBIX_FILE_PATH: ${{ secrets.PBIX_FILE_PATH }}
+          DATASET_NAME: ${{ secrets.DATASET_NAME }}
+        run: python automation_script.py  # Replace with your script filename
