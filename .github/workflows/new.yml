@@ -1,8 +1,7 @@
 name: Publish and Move Power BI Report
 
 on:
-  # Trigger the workflow manually
-  workflow_dispatch:
+  workflow_dispatch:  # Allows manual triggering of the workflow
 
   # Trigger the workflow when a new or updated .pbix file is pushed to the specified folder
   push:
@@ -10,7 +9,7 @@ on:
       - "uploaded_files/*.pbix"  # Specify the folder where new reports are uploaded
 
 jobs:
-  publish_and_move:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,14 +19,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'  # Specify the Python version you need
+          python-version: '3.x'
 
       - name: Install Dependencies
         run: |
           pip install requests
           pip install python-dotenv
 
-      - name: Set Environment Variables
+      - name: Set Environment Variables for Publish
         env:
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
@@ -35,8 +34,6 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
           WORKSPACE_ID: ${{ secrets.WORKSPACE_ID }}
-          PBIX_FILE_PATH: ${{ github.event.head_commit.modified[0] }}  # Use the modified file path
-          TARGET_FOLDER_PATH: "archived_reports"  # Destination folder after successful publish
         run: |
           echo "CLIENT_ID=${CLIENT_ID}" >> $GITHUB_ENV
           echo "CLIENT_SECRET=${CLIENT_SECRET}" >> $GITHUB_ENV
@@ -44,10 +41,15 @@ jobs:
           echo "USERNAME=${USERNAME}" >> $GITHUB_ENV
           echo "PASSWORD=${PASSWORD}" >> $GITHUB_ENV
           echo "WORKSPACE_ID=${WORKSPACE_ID}" >> $GITHUB_ENV
-          echo "PBIX_FILE_PATH=${PBIX_FILE_PATH}" >> $GITHUB_ENV
-          echo "TARGET_FOLDER_PATH=${TARGET_FOLDER_PATH}" >> $GITHUB_ENV
+          # Assign the modified file path to PBIX_FILE_PATH if only one file changed
+          if [ "${{ github.event.commits[0].modified[0] }}" ]; then
+            echo "PBIX_FILE_PATH=${{ github.event.commits[0].modified[0] }}" >> $GITHUB_ENV
+          else
+            echo "No modified .pbix file found; exiting"
+            exit 1
+          fi
 
-      - name: Run Publish and Move Script
+      - name: Publish to Power BI
         env:
           CLIENT_ID: ${{ env.CLIENT_ID }}
           CLIENT_SECRET: ${{ env.CLIENT_SECRET }}
@@ -56,11 +58,31 @@ jobs:
           PASSWORD: ${{ env.PASSWORD }}
           WORKSPACE_ID: ${{ env.WORKSPACE_ID }}
           PBIX_FILE_PATH: ${{ env.PBIX_FILE_PATH }}
-          TARGET_FOLDER_PATH: ${{ env.TARGET_FOLDER_PATH }}
         run: |
           python automation_script.py  # Replace with the actual name of your script
 
-      - name: Commit and Push Moved .pbix File
-        if: success()
+  move_and_commit:
+    runs-on: ubuntu-latest
+    needs: publish  # Run only if the publish job succeeds
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Environment Variables for Move
+        env:
+          TARGET_FOLDER_PATH: "archived_reports"  # Destination folder for moving the file
+          PBIX_FILE_PATH: ${{ needs.publish.outputs.PBIX_FILE_PATH }}
         run: |
-          git config --global user.name "github-actions[b
+          echo "TARGET_FOLDER_PATH=${TARGET_FOLDER_PATH}" >> $GITHUB_ENV
+          echo "PBIX_FILE_PATH=${PBIX_FILE_PATH}" >> $GITHUB_ENV
+
+      - name: Move and Commit Published .pbix File
+        run: |
+          mkdir -p "${{ env.TARGET_FOLDER_PATH }}"
+          mv "${{ env.PBIX_FILE_PATH }}" "${{ env.TARGET_FOLDER_PATH }}/"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add "${{ env.TARGET_FOLDER_PATH }}/$(basename ${{ env.PBIX_FILE_PATH }})"
+          git commit -m "Move published .pbix file to target folder"
+          git push
