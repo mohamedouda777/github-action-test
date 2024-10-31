@@ -3,7 +3,7 @@ import os
 
 # Azure AD app credentials
 CLIENT_ID = os.getenv('CLIENT_ID')
-CLIENT_SECRET = os.getenv('CLIENT_SECRET')  # New line to get client_secret
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')  # Include client_secret
 TENANT_ID = os.getenv('TENANT_ID')
 
 # Service account credentials
@@ -13,7 +13,14 @@ PASSWORD = os.getenv('PASSWORD')
 # Power BI settings
 WORKSPACE_ID = os.getenv('WORKSPACE_ID')
 PBIX_FILE_PATH = os.getenv('PBIX_FILE_PATH')  # Update as needed
-DATASET_NAME = os.getenv('DATASET_NAME')  # Update as needed
+
+# Function to extract DATASET_NAME from the uploaded file name
+def get_dataset_name(pbix_file_path):
+    # Extract the base file name without the directory
+    base_name = os.path.basename(pbix_file_path)
+    # Remove the file extension to get the dataset name
+    dataset_name = os.path.splitext(base_name)[0]
+    return dataset_name
 
 # Authenticate and get an access token using ROPC flow
 def get_access_token():
@@ -42,9 +49,8 @@ def get_access_token():
         raise
 
 # Publish the .pbix file to Power BI
-def publish_pbix(access_token):
-    url = f'https://api.powerbi.com/v1.0/myorg/groups/{WORKSPACE_ID}/imports?datasetDisplayName={DATASET_NAME}&nameConflict=CreateOrOverwrite'
-    #url = f'https://api.powerbi.com/v1.0/myorg/groups/{WORKSPACE_ID}/imports?datasetDisplayName={DATASET_NAME}&nameConflict=Overwrite'
+def publish_pbix(access_token, dataset_name):
+    url = f'https://api.powerbi.com/v1.0/myorg/groups/{WORKSPACE_ID}/imports?datasetDisplayName={dataset_name}&nameConflict=CreateOrOverwrite'
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
@@ -72,14 +78,18 @@ def publish_pbix(access_token):
 def main():
     print("Starting Power BI publish process...")
     # Ensure all required environment variables are set
-    required_vars = [CLIENT_ID, CLIENT_SECRET, TENANT_ID, USERNAME, PASSWORD, WORKSPACE_ID, PBIX_FILE_PATH, DATASET_NAME]
+    required_vars = [CLIENT_ID, CLIENT_SECRET, TENANT_ID, USERNAME, PASSWORD, WORKSPACE_ID, PBIX_FILE_PATH]
     if not all(required_vars):
         print("One or more environment variables are missing. Please ensure all required variables are set.")
         return
 
+    # Get the dataset name from the PBIX file name
+    dataset_name = get_dataset_name(PBIX_FILE_PATH)
+    print(f"Dataset name derived from file: {dataset_name}")
+
     access_token = get_access_token()
     if access_token:
-        publish_pbix(access_token)
+        publish_pbix(access_token, dataset_name)
     else:
         print("Failed to obtain access token.")
 
