@@ -6,7 +6,7 @@ on:
   # Trigger the workflow when a new or updated .pbix file is pushed to the specified folder
   push:
     paths:
-      - "/uploaded_files/*.pbix"  # Specify the folder where new reports are uploaded
+      - "uploaded_files/*.pbix"  # Specify the folder where new reports are uploaded
 
 jobs:
   publish:
@@ -29,8 +29,8 @@ jobs:
       - name: Detect .pbix File
         id: detect_file
         run: |
-          # Check for any .pbix files in the reports folder
-          PBIX_FILE=$(find reports -type f -name "*.pbix" | head -n 1)
+          # Check for any .pbix files in the uploaded_files folder
+          PBIX_FILE=$(find uploaded_files -type f -name "*.pbix" | head -n 1)
           if [ -z "$PBIX_FILE" ]; then
             echo "No .pbix file found in the uploaded_files folder; exiting."
             exit 1
