@@ -66,4 +66,42 @@ def get_access_token():
 # Publish the .pbix file to Power BI
 def publish_pbix(access_token):
     if not PBIX_FILE_PATH or not os.path.exists(PBIX_FILE_PATH):
-        print(
+        print(f"[ERROR] PBIX file not found at specified path: {PBIX_FILE_PATH}")
+        sys.exit(1)
+
+    url = f'https://api.powerbi.com/v1.0/myorg/groups/{WORKSPACE_ID}/imports?datasetDisplayName={os.path.basename(PBIX_FILE_PATH)}&nameConflict=CreateOrOverwrite'
+    headers = {
+        'Authorization': f'Bearer {access_token}'
+    }
+    try:
+        with open(PBIX_FILE_PATH, 'rb') as pbix_file:
+            files = {
+                'file': pbix_file
+            }
+            response = requests.post(url, headers=headers, files=files)
+            response.raise_for_status()
+            print('Published the Power BI report successfully.')
+    except requests.exceptions.HTTPError as e:
+        print("Failed to publish the .pbix file:")
+        print("Status Code:", e.response.status_code)
+        print("Response:", e.response.text)
+        raise
+    except FileNotFoundError:
+        print("File not found. Please check the PBIX_FILE_PATH.")
+    except Exception as e:
+        print("An unexpected error occurred:", str(e))
+
+def main():
+    print("Starting Power BI publish process...")
+    # Check that all required environment variables are set
+    check_env_variables()
+
+    # Get the access token
+    access_token = get_access_token()
+    if access_token:
+        publish_pbix(access_token)
+    else:
+        print("Failed to obtain access token.")
+
+if __name__ == '__main__':
+    main()
