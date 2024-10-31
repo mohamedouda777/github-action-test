@@ -12,6 +12,9 @@ jobs:
   publish:
     runs-on: ubuntu-latest
 
+    outputs:
+      pbix_file_path: ${{ steps.detect_file.outputs.pbix_file_path }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -36,6 +39,7 @@ jobs:
             exit 1
           else
             echo "PBIX_FILE_PATH=$PBIX_FILE" >> $GITHUB_ENV
+            echo "::set-output name=pbix_file_path::$PBIX_FILE"
           fi
 
       - name: Set Environment Variables for Publish
@@ -62,7 +66,7 @@ jobs:
           USERNAME: ${{ env.USERNAME }}
           PASSWORD: ${{ env.PASSWORD }}
           WORKSPACE_ID: ${{ env.WORKSPACE_ID }}
-          PBIX_FILE_PATH: ${{ env.PBIX_FILE_PATH }}
+          PBIX_FILE_PATH: ${{ steps.detect_file.outputs.pbix_file_path }}
         run: |
           python automation_script.py  # Replace with the actual name of your script
 
@@ -77,7 +81,7 @@ jobs:
       - name: Set Environment Variables for Move
         env:
           TARGET_FOLDER_PATH: "archived_reports"  # Destination folder for moving the file
-          PBIX_FILE_PATH: ${{ env.PBIX_FILE_PATH }}
+          PBIX_FILE_PATH: ${{ needs.publish.outputs.pbix_file_path }}
         run: |
           echo "TARGET_FOLDER_PATH=${TARGET_FOLDER_PATH}" >> $GITHUB_ENV
           echo "PBIX_FILE_PATH=${PBIX_FILE_PATH}" >> $GITHUB_ENV
