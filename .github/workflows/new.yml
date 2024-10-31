@@ -1,10 +1,16 @@
-name: Publish Power BI Report
+name: Publish and Move Power BI Report
 
 on:
-  workflow_dispatch:  # Allows manual triggering of the workflow
+  # Trigger the workflow manually
+  workflow_dispatch:
+
+  # Trigger the workflow when a new or updated .pbix file is pushed to the specified folder
+  push:
+    paths:
+      - "uploaded_files/*.pbix"  # Specify the folder where new reports are uploaded
 
 jobs:
-  publish:
+  publish_and_move:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,8 +35,8 @@ jobs:
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
           WORKSPACE_ID: ${{ secrets.WORKSPACE_ID }}
-          PBIX_FILE_PATH: ${{ secrets.PBIX_FILE_PATH }}
-          DATASET_NAME: ${{ secrets.DATASET_NAME }}
+          PBIX_FILE_PATH: ${{ github.event.head_commit.modified[0] }}  # Use the modified file path
+          TARGET_FOLDER_PATH: "archived_reports"  # Destination folder after successful publish
         run: |
           echo "CLIENT_ID=${CLIENT_ID}" >> $GITHUB_ENV
           echo "CLIENT_SECRET=${CLIENT_SECRET}" >> $GITHUB_ENV
@@ -39,9 +45,9 @@ jobs:
           echo "PASSWORD=${PASSWORD}" >> $GITHUB_ENV
           echo "WORKSPACE_ID=${WORKSPACE_ID}" >> $GITHUB_ENV
           echo "PBIX_FILE_PATH=${PBIX_FILE_PATH}" >> $GITHUB_ENV
-          echo "DATASET_NAME=${DATASET_NAME}" >> $GITHUB_ENV
+          echo "TARGET_FOLDER_PATH=${TARGET_FOLDER_PATH}" >> $GITHUB_ENV
 
-      - name: Run Publish Script
+      - name: Run Publish and Move Script
         env:
           CLIENT_ID: ${{ env.CLIENT_ID }}
           CLIENT_SECRET: ${{ env.CLIENT_SECRET }}
@@ -50,6 +56,11 @@ jobs:
           PASSWORD: ${{ env.PASSWORD }}
           WORKSPACE_ID: ${{ env.WORKSPACE_ID }}
           PBIX_FILE_PATH: ${{ env.PBIX_FILE_PATH }}
-          DATASET_NAME: ${{ env.DATASET_NAME }}
+          TARGET_FOLDER_PATH: ${{ env.TARGET_FOLDER_PATH }}
         run: |
           python automation_script.py  # Replace with the actual name of your script
+
+      - name: Commit and Push Moved .pbix File
+        if: success()
+        run: |
+          git config --global user.name "github-actions[b
