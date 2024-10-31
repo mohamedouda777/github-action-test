@@ -43,7 +43,8 @@ def get_access_token():
 
 # Publish the .pbix file to Power BI
 def publish_pbix(access_token):
-    url = f'https://api.powerbi.com/v1.0/myorg/groups/{WORKSPACE_ID}/imports?datasetDisplayName={DATASET_NAME}&nameConflict=Overwrite'
+    url = f'https://api.powerbi.com/v1.0/myorg/groups/{WORKSPACE_ID}/imports?datasetDisplayName={DATASET_NAME}&nameConflict=CreateOrOverwrite'
+    #url = f'https://api.powerbi.com/v1.0/myorg/groups/{WORKSPACE_ID}/imports?datasetDisplayName={DATASET_NAME}&nameConflict=Overwrite'
     headers = {
         'Authorization': f'Bearer {access_token}'
     }
