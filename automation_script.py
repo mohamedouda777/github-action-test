@@ -1,5 +1,6 @@
 import requests
 import os
+import shutil  # Import shutil for moving files
 
 # Azure AD app credentials
 CLIENT_ID = os.getenv('CLIENT_ID')
@@ -13,6 +14,7 @@ PASSWORD = os.getenv('PASSWORD')
 # Power BI settings
 WORKSPACE_ID = os.getenv('WORKSPACE_ID')
 PBIX_FILE_PATH = os.getenv('PBIX_FILE_PATH')  # Update as needed
+TARGET_FOLDER_PATH = os.getenv('TARGET_FOLDER_PATH')  # Folder to move the file after successful publish
 
 # Function to extract DATASET_NAME from the uploaded file name
 def get_dataset_name(pbix_file_path):
@@ -75,10 +77,21 @@ def publish_pbix(access_token, dataset_name):
     except Exception as e:
         print("An unexpected error occurred:", str(e))
 
+# Move the .pbix file to the target folder
+def move_pbix_file():
+    try:
+        target_path = os.path.join(TARGET_FOLDER_PATH, os.path.basename(PBIX_FILE_PATH))
+        shutil.move(PBIX_FILE_PATH, target_path)
+        print(f"Moved the .pbix file to {TARGET_FOLDER_PATH}")
+    except FileNotFoundError:
+        print("Target folder not found. Please check the TARGET_FOLDER_PATH.")
+    except Exception as e:
+        print("An error occurred while moving the file:", str(e))
+
 def main():
     print("Starting Power BI publish process...")
     # Ensure all required environment variables are set
-    required_vars = [CLIENT_ID, CLIENT_SECRET, TENANT_ID, USERNAME, PASSWORD, WORKSPACE_ID, PBIX_FILE_PATH]
+    required_vars = [CLIENT_ID, CLIENT_SECRET, TENANT_ID, USERNAME, PASSWORD, WORKSPACE_ID, PBIX_FILE_PATH, TARGET_FOLDER_PATH]
     if not all(required_vars):
         print("One or more environment variables are missing. Please ensure all required variables are set.")
         return
@@ -90,6 +103,7 @@ def main():
     access_token = get_access_token()
     if access_token:
         publish_pbix(access_token, dataset_name)
+        move_pbix_file()  # Move the file after successful publish
     else:
         print("Failed to obtain access token.")
 
