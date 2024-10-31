@@ -93,7 +93,7 @@ jobs:
         run: |
           python automation_script.py
 
-  move_and_commit:
+   move_and_commit:
     runs-on: ubuntu-latest
     needs: publish  # Run only if the publish job succeeds
 
@@ -115,6 +115,6 @@ jobs:
           mv "${{ env.PBIX_FILE_PATH }}" "${{ env.TARGET_FOLDER_PATH }}/"
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add "${{ env.TARGET_FOLDER_PATH }}/$(basename ${{ env.PBIX_FILE_PATH }})"
+          git add -A  # Stage both deletions and additions
           git commit -m "Move published .pbix file to target folder"
           git push
