@@ -6,7 +6,7 @@ on:
   # Trigger the workflow when a new or updated .pbix file is pushed to the specified folder
   push:
     paths:
-      - "uploaded_files/*.pbix"  # Specify the folder where new reports are uploaded
+      - "/uploaded_files/*.pbix"  # Specify the folder where new reports are uploaded
 
 jobs:
   publish:
