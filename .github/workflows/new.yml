@@ -2,14 +2,12 @@ name: Publish and Move Power BI Report
 
 on:
   workflow_dispatch:  # Allows manual triggering of the workflow
-
-  # Trigger the workflow when a new or updated .pbix file is pushed to the specified folder
   push:
     paths:
-      - "uploaded_files/*.pbix"  # Specify the folder where new reports are uploaded
+      - "uploaded_files/*.pbix"  # Trigger on changes to files in uploaded_files directory
 
 permissions:
-  contents: write  # Allow write access to commit changes
+  contents: write  # Give the workflow write permissions for pushing commits
 
 jobs:
   publish:
@@ -33,69 +31,4 @@ jobs:
           pip install python-dotenv
 
       - name: Detect .pbix File
-        id: detect_file
-        run: |
-          # Check for any .pbix files in the uploaded_files folder
-          PBIX_FILE=$(find uploaded_files -type f -name "*.pbix" | head -n 1)
-          if [ -z "$PBIX_FILE" ]; then
-            echo "No .pbix file found in the uploaded_files folder; exiting."
-            exit 1
-          else
-            echo "PBIX_FILE_PATH=$PBIX_FILE" >> $GITHUB_ENV
-            echo "::set-output name=pbix_file_path::$PBIX_FILE"
-          fi
-
-      - name: Debug Environment Variables
-        run: |
-          echo "CLIENT_ID: ${CLIENT_ID}"
-          echo "TENANT_ID: ${TENANT_ID}"
-          echo "WORKSPACE_ID: ${WORKSPACE_ID}"
-          echo "PBIX_FILE_PATH: ${{ steps.detect_file.outputs.pbix_file_path }}"
-        env:
-          CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          TENANT_ID: ${{ secrets.TENANT_ID }}
-          WORKSPACE_ID: ${{ secrets.WORKSPACE_ID }}
-
-      - name: Publish to Power BI
-        if: success()
-        env:
-          CLIENT_ID: ${{ secrets.CLIENT_ID }}
-          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
-          TENANT_ID: ${{ secrets.TENANT_ID }}
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          WORKSPACE_ID: ${{ secrets.WORKSPACE_ID }}
-          PBIX_FILE_PATH: ${{ steps.detect_file.outputs.pbix_file_path }}
-        run: |
-          if [ -z "${PBIX_FILE_PATH}" ]; then
-            echo "Error: PBIX_FILE_PATH is not set. Exiting."
-            exit 1
-          fi
-          python automation_script.py  # Replace with the actual name of your script
-
-  move_and_commit:
-    runs-on: ubuntu-latest
-    needs: publish  # Run only if the publish job succeeds
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}  # Use the GITHUB_TOKEN with write permissions
-
-      - name: Move and Commit Published .pbix File
-        env:
-          TARGET_FOLDER_PATH: "archived_reports"
-          PBIX_FILE_PATH: ${{ needs.publish.outputs.pbix_file_path }}
-        run: |
-          if [ -z "${PBIX_FILE_PATH}" ]; then
-            echo "Error: PBIX_FILE_PATH is not set. Exiting."
-            exit 1
-          fi
-          mkdir -p "${TARGET_FOLDER_PATH}"
-          mv "${PBIX_FILE_PATH}" "${TARGET_FOLDER_PATH}/"
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add "${TARGET_FOLDER_PATH}/$(basename ${PBIX_FILE_PATH})"
-          git commit -m "Move published .pbix file to target folder"
-          git push
+        id
