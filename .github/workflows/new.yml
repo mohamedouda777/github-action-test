@@ -6,7 +6,7 @@ on:
   # Trigger the workflow when a new or updated .pbix file is pushed to the specified folder
   push:
     paths:
-      - "reports/*.pbix"  # Specify the folder where new reports are uploaded
+      - "uploaded_files/*.pbix"  # Specify the folder where new reports are uploaded
 
 jobs:
   publish:
@@ -32,7 +32,7 @@ jobs:
           # Check for any .pbix files in the reports folder
           PBIX_FILE=$(find reports -type f -name "*.pbix" | head -n 1)
           if [ -z "$PBIX_FILE" ]; then
-            echo "No .pbix file found in the reports folder; exiting."
+            echo "No .pbix file found in the uploaded_files folder; exiting."
             exit 1
           else
             echo "PBIX_FILE_PATH=$PBIX_FILE" >> $GITHUB_ENV
