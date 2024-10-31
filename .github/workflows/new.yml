@@ -6,7 +6,7 @@ on:
   # Trigger the workflow when a new or updated .pbix file is pushed to the specified folder
   push:
     paths:
-      - "uploaded_files/*.pbix"  # Specify the folder where new reports are uploaded
+      - "reports/*.pbix"  # Specify the folder where new reports are uploaded
 
 jobs:
   publish:
@@ -26,6 +26,18 @@ jobs:
           pip install requests
           pip install python-dotenv
 
+      - name: Detect .pbix File
+        id: detect_file
+        run: |
+          # Check for any .pbix files in the reports folder
+          PBIX_FILE=$(find reports -type f -name "*.pbix" | head -n 1)
+          if [ -z "$PBIX_FILE" ]; then
+            echo "No .pbix file found in the reports folder; exiting."
+            exit 1
+          else
+            echo "PBIX_FILE_PATH=$PBIX_FILE" >> $GITHUB_ENV
+          fi
+
       - name: Set Environment Variables for Publish
         env:
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
@@ -41,13 +53,6 @@ jobs:
           echo "USERNAME=${USERNAME}" >> $GITHUB_ENV
           echo "PASSWORD=${PASSWORD}" >> $GITHUB_ENV
           echo "WORKSPACE_ID=${WORKSPACE_ID}" >> $GITHUB_ENV
-          # Assign the modified file path to PBIX_FILE_PATH if only one file changed
-          if [ "${{ github.event.commits[0].modified[0] }}" ]; then
-            echo "PBIX_FILE_PATH=${{ github.event.commits[0].modified[0] }}" >> $GITHUB_ENV
-          else
-            echo "No modified .pbix file found; exiting"
-            exit 1
-          fi
 
       - name: Publish to Power BI
         env:
@@ -72,7 +77,7 @@ jobs:
       - name: Set Environment Variables for Move
         env:
           TARGET_FOLDER_PATH: "archived_reports"  # Destination folder for moving the file
-          PBIX_FILE_PATH: ${{ needs.publish.outputs.PBIX_FILE_PATH }}
+          PBIX_FILE_PATH: ${{ env.PBIX_FILE_PATH }}
         run: |
           echo "TARGET_FOLDER_PATH=${TARGET_FOLDER_PATH}" >> $GITHUB_ENV
           echo "PBIX_FILE_PATH=${PBIX_FILE_PATH}" >> $GITHUB_ENV
